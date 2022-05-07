@@ -154,7 +154,7 @@ if __name__ == "__main__":
 
     # image = cv.imread("5.png", cv.IMREAD_COLOR)
 
-    camera("IMG_1923.MOV")
+    camera("res/vid3.MOV")
     # contour(sort(base(image)), image)
 
     cv.waitKey(0)
