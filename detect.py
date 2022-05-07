@@ -29,30 +29,35 @@ def blend(list_images): # Blend images equally.
 
 
 def sort(img):
-    lower_red = np.array([10, 10, 100], dtype="uint8")
-    upper_red = np.array([70, 70, 255], dtype="uint8")
-
-    lower_blue = np.array([70, 10, 10], dtype="uint8")
-    upper_blue = np.array([255, 70, 70], dtype="uint8")
-    #
-    # lower_green = np.array([15, 80, 15], dtype="uint8")
-    # upper_green = np.array([75, 255, 75], dtype="uint8")
-
     mask_red = cv.inRange(img, lower_red, upper_red)
     # cv.imshow("mask", mask_red)
     mask_blue = cv.inRange(img, lower_blue, upper_blue)
-    # mask_green = cv.inRange(img, lower_green, upper_green)
+    mask_green = cv.inRange(img, lower_green, upper_green)
+    mask_orange = cv.inRange(img, lower_orange, upper_orange)
+    mask_yellow = cv.inRange(img, lower_yellow, upper_yellow)
+    mask_black = cv.inRange(img, lower_black, upper_black)
 
     red_detected_output = cv.bitwise_and(img, img, mask=mask_red)
     blue_detected_output = cv.bitwise_and(img, img, mask=mask_blue)
-    # green_detected_output = cv.bitwise_and(img, img, mask=mask_green)
+    green_detected_output = cv.bitwise_and(img, img, mask=mask_green)
+    orange_detected_output = cv.bitwise_and(img, img, mask=mask_orange)
+    yellow_detected_output = cv.bitwise_and(img, img, mask=mask_yellow)
+    black_detected_output = cv.bitwise_and(img, img, mask=mask_black)
 
-    red_frame = contour(red_detected_output, red_detected_output, (0, 0, 255), "red")
+    red_frame = contour(red_detected_output, img, (0, 0, 255), "red")
+    # to see the colors better (for debug reasons)
+    # red_frame = contour(red_detected_output, red_detected_output, (0, 0, 255), "red")
     # cv.imshow("red", red_frame)
-    blue_frame = contour(blue_detected_output, blue_detected_output, (255, 0, 0), "blue")
+    blue_frame = contour(blue_detected_output, img, (255, 0, 0), "blue")
+    # to see the colors better (for debug reasons)
+    # blue_frame = contour(blue_detected_output, blue_detected_output, (255, 0, 0), "blue")
     # cv.imshow("blue", blue_frame)
+    green_frame = contour(green_detected_output, img, (0, 255, 0), "green")
+    orange_frame = contour(orange_detected_output, img, (0, 70, 255), "orange")
+    yellow_frame = contour(yellow_detected_output, img, (0, 255, 255), "yellow")
+    black_frame = contour(black_detected_output, img, (0, 0, 0), "black")
 
-    ls = [red_frame, blue_frame]
+    ls = [red_frame, blue_frame, green_frame, orange_frame, yellow_frame, black_frame]
     out = blend(ls)
 
     cv.imshow("color detection", out)
@@ -66,7 +71,6 @@ def contour(img, frame, color=(0, 0, 255), color_name="red"):
 
     # kernel = np.ones((3, 3), np.uint8)
     # morph = cv.morphologyEx(thresh_gray, cv.MORPH_OPEN, kernel)
-    # # a 2. blur nélkül pontatlanabb a színek detektálása
     # kernel = np.ones((5, 5), np.uint8)
     # morph = cv.morphologyEx(morph, cv.MORPH_CLOSE, kernel)
 
@@ -75,7 +79,9 @@ def contour(img, frame, color=(0, 0, 255), color_name="red"):
 
     for c in contours:
         # if the contour is not sufficiently large, ignore it
-        if cv.contourArea(c) < 100:
+        if cv.contourArea(c) < 500:
+            continue
+        elif cv.contourArea(c) > 15000:
             continue
 
         M = cv.moments(c)
@@ -112,11 +118,11 @@ def camera(mov=""):
         _, frame = cap.read()
 
         # Convert to grayscale
-        # gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
-        contour(sort(frame), frame)
+        sort(frame)
 
-        cv.imshow('Video', frame)
+        cv.imshow('Gray', gray)
 
         # Stop if escape is pressed
         k = cv.waitKey(30) & 0xff
@@ -128,9 +134,27 @@ def camera(mov=""):
 
 
 if __name__ == "__main__":
-    image = cv.imread("5.png", cv.IMREAD_COLOR)
+    lower_red = np.array([15, 15, 130], dtype="uint8")
+    upper_red = np.array([80, 65, 255], dtype="uint8")
 
-    camera("IMG_1916.MOV")
+    lower_blue = np.array([100, 30, 10], dtype="uint8")
+    upper_blue = np.array([255, 160, 130], dtype="uint8")
+
+    lower_green = np.array([30, 110, 30], dtype="uint8")
+    upper_green = np.array([140, 255, 120], dtype="uint8")
+
+    lower_orange = np.array([70, 70, 110], dtype="uint8")
+    upper_orange = np.array([120, 130, 255], dtype="uint8")
+
+    lower_yellow = np.array([65, 160, 160], dtype="uint8")
+    upper_yellow = np.array([135, 255, 255], dtype="uint8")
+
+    lower_black = np.array([0, 0, 0], dtype="uint8")
+    upper_black = np.array([60, 60, 60], dtype="uint8")
+
+    # image = cv.imread("5.png", cv.IMREAD_COLOR)
+
+    camera("IMG_1923.MOV")
     # contour(sort(base(image)), image)
 
     cv.waitKey(0)
